@@ -17,7 +17,7 @@ import java.util.Map;
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+    private final LocalDate minDate = LocalDate.of(1895, 12, 28);
     private final Map<Integer, Film> films = new HashMap<>();
 
     @GetMapping
@@ -62,7 +62,7 @@ public class FilmController {
         if (film.getDuration() < 1) {
             throw new ValidationException("продолжительность фильма должна быть положительной!");
         }
-        if (film.getReleaseDate().isBefore(MIN_RELEASE_DATE)) {
+        if (film.getReleaseDate().isBefore(minDate)) {
             throw new ValidationException("Дата релиза не может быть раньше 28 декабря 1895 года!");
         }
 
