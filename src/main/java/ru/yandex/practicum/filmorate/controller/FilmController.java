@@ -68,7 +68,7 @@ public class FilmController {
 
     }
 
-    public void cleanFilms() {// Метод для тестирования
+    public void cleanFilms() {
         films.clear();
     }
 
