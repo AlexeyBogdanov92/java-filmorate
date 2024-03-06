@@ -63,7 +63,7 @@ public class UserController {
         }
     }
 
-    public void cleanUsers() {// Метод для тестирования
+    public void cleanUsers() {
         users.clear();
     }
 
