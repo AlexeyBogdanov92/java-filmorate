@@ -82,7 +82,7 @@ public class FilmService {
     }
 
     public void validate(Film film, String messagePath) throws ValidationException {
-        if (film.getName().isBlank()|| film.getName() == null) {
+        if (film.getName().isBlank()) {
             throw new ValidationException("Название фильма не может быть пустым!");
         }
 
