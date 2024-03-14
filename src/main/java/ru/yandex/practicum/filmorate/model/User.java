@@ -1,13 +1,14 @@
 package ru.yandex.practicum.filmorate.model;
 
-
 import lombok.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
 import java.time.LocalDate;
-
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -21,14 +22,18 @@ public class User {
     private String login;
     private String name;
     @NotNull
+    @Past
     private LocalDate birthday;
-    private static int countId = 1;
-
     private static int countID = 0;
+    private final Set<Integer> friends = new HashSet<>();
 
     public void generateId() {
         countID++;
         this.id = countID;
+    }
+
+    public static void resetCountID() {
+        countID = 0;
     }
 
 }
