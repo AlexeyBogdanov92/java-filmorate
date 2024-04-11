@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exeptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -21,64 +23,60 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FilmService {
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
     private final LocalDate minDate = LocalDate.of(1895, 12, 28);
 
     public List<Film> getAllFilms() {
-        log.info("Получение списка фильмов");
         return filmStorage.getAllFilms();
     }
 
     public Film getFilmById(Integer filmId) {
-        log.info("Получение фильма по id: {}", filmId);
         return filmStorage.getFilmById(filmId);
     }
 
     public Film postFilm(Film film) {
-        log.info("Добавление (создание) фильм: {}", film);
+        validate(film, "создать");
         return filmStorage.postFilm(film);
     }
 
     public Film putFilm(Film film) {
-        log.info("Обновление данных фильма: {}", film);
+        validate(film, "обновить");
         return filmStorage.putFilm(film);
     }
 
     public Map<String, String> deleteFilmById(Integer filmId) {
-        log.info("Удаление фильма по id: {}", filmId);
         return filmStorage.deleteFilmById(filmId);
     }
 
     public Map<String, String> deleteAllFilms() {
-        log.info("Удаление всех фильмов");
         return filmStorage.deleteAllFilms();
     }
 
     public Film addLikeToFilm(Integer filmId, Integer userId) {
-        final Film film = filmStorage.getFilmById(filmId);
-        final User user = userStorage.getUserById(userId);
-        log.info("Пользователь {} добавляет лайк фильму {}", user.getName(), film.getName());
-
-        film.getLikes().add(userId);
-        log.info("Пользователь {} поставил лайка фильму {}", user.getName(), film.getName());
-        return film;
+        return filmStorage.addLikeToFilm(filmId, userId);
     }
 
     public Film deleteLikeFromFilm(Integer filmId, Integer userId) {
-        final Film film = filmStorage.getFilmById(filmId);
-        final User user = userStorage.getUserById(userId);
-        log.info("Пользователь {} удаляет лайк у фильма {}", user.getName(), film.getName());
-
-        film.getLikes().remove(userId);
-        log.info("Пользователь {} удалил лайк у фильма {}", user.getName(), film.getName());
-        return film;
+        return filmStorage.deleteLikeFromFilm(filmId, userId);
     }
 
     public List<Film> getPopularFilms(Integer count) {
-        return filmStorage.getAllFilms().stream()
-                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getPopularFilms(count);
+    }
+
+    public List<Genre> getAllGenres() {
+        return filmStorage.getAllGenres();
+    }
+
+    public Genre getGenreById(Integer genreId) {
+        return filmStorage.getGenreById(genreId);
+    }
+
+    public List<MPA> getAllMPA() {
+        return filmStorage.getAllMPA();
+    }
+
+    public MPA getMPAById(Integer mpaId) {
+        return filmStorage.getMPAById(mpaId);
     }
 
     public void validate(Film film, String messagePath) throws ValidationException {

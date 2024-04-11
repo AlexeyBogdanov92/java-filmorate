@@ -2,10 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,14 +12,14 @@ import java.util.Set;
 @AllArgsConstructor
 public class User {
     private Integer id;
-    @NotBlank
+    @NotBlank(message = "email - не может быть пустым")
     @Email
     private String email;
-    @NotBlank
+    @NotBlank(message = "login - не может быть пустым")
     private String login;
     private String name;
-    @NotNull
-    @Past
+    @NotNull(message = "birthday - не может быть пустым")
+    @Past(message = "birthday - не может быть из будущего")
     private LocalDate birthday;
     private static int countID = 0;
     private final Set<Integer> friends = new HashSet<>();

@@ -12,16 +12,18 @@ import java.util.Set;
 @AllArgsConstructor
 public class Film {
     private Integer id;
-    @NotBlank
+    @NotBlank(message = "name - не должно быть пустым")
     private String name;
-    @Size(max = 200)
+    @Size(max = 200, message = "description - не должно привышать 200 символов")
     private String description;
-    @NotNull
+    @NotNull(message = "releaseDate обязателен к заполнению")
     private LocalDate releaseDate;
-    @Min(1)
+    @Min(value = 1, message = "duration - должна быть не меньше 1 минуты")
     private long duration;
     private static int countID = 0;
     private final Set<Integer> likes = new HashSet<>();
+    private Set<Genre> genres;
+    private MPA mpa;
 
     public void generateId() {
         countID++;
