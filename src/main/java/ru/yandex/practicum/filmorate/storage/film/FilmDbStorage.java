@@ -57,13 +57,13 @@ public class FilmDbStorage implements FilmStorage {
             return foundFilm;
         } catch (RuntimeException e) {
             log.info("Фильм с id {} не найден", id);
-             throw new NotFoundException(String.format("Фильм по id %d не найден", id));
+            throw new NotFoundException(String.format("Фильм по id %d не найден", id));
         }
     }
 
     @Override
     public Film postFilm(Film film) {
-                SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("films")
                 .usingGeneratedKeyColumns("film_id");
 
@@ -86,7 +86,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film putFilm(Film film) {
-                String query = "UPDATE films SET film_name = ?, " +
+        String query = "UPDATE films SET film_name = ?, " +
                 "description = ?, " +
                 "release_date = ?, " +
                 "duration = ?, " +
@@ -145,7 +145,7 @@ public class FilmDbStorage implements FilmStorage {
         final Film foundFilm = getFilmById(filmId);
         final User foundUser = userStorage.getUserById(userId);
 
-                String query = "SELECT " +
+        String query = "SELECT " +
                 "COUNT(film_like_id) " +
                 "FROM film_likes " +
                 "WHERE film_id = ? AND user_id = ?";

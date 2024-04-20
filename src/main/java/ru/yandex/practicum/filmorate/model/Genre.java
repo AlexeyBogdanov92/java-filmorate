@@ -12,9 +12,9 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Genre {
-    //@Min(value = 1, message = "min 1")
-    //@Max(value = 6, message = "max 6")
+    @Min(value = 1, message = "min 1")
+    @Max(value = 6, message = "max 6")
     private int id;
-    //@NotBlank
+    @NotBlank
     private String name;
 }

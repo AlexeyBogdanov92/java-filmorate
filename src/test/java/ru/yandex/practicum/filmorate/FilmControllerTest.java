@@ -127,7 +127,7 @@ class FilmControllerTest {
 
         film.setName("");
         Exception exc = assertThrows(ValidationException.class, () -> filmService.validate(film, "обновить"));
-        assertEquals("Название фильма не может быть пустым!", exc.getMessage());
+        assertEquals("Не удалось обновить фильм, т.к. наименование не заполнено", exc.getMessage());
 
         film.setName("Хоббит");
         film.setDescription("x".repeat(201));
@@ -139,12 +139,12 @@ class FilmControllerTest {
         film.setReleaseDate(LocalDate.of(1888, 12, 12));
         exc = assertThrows(ValidationException.class, () -> filmService.validate(film, "обновить"));
         assertEquals("Не удалось обновить фильм," +
-                " т.к. дата релиза не может быть раньше даты рождения кино.", exc.getMessage());
+                " т.к. дата релиза не может быть раньше даты создания кино.", exc.getMessage());
 
         film.setReleaseDate(LocalDate.of(1988, 12, 12));
         film.setDuration(-1L);
         exc = assertThrows(ValidationException.class, () -> filmService.validate(film, "обновить"));
-        assertEquals("Не удалось обновить фильм, т.к. продолжительность должна быть минимум 1",
+        assertEquals("Не удалось обновить фильм, т.к. продолжительность фильма должна быть положительной.",
                 exc.getMessage());
     }
 

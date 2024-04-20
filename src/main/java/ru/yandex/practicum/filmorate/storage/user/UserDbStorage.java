@@ -166,11 +166,11 @@ public class UserDbStorage implements UserStorage {
                 "WHERE user_id = ? AND friend_id = ?;";
         int deletedLine = jdbcTemplate.update(query, userId, friendId);
 
-        if (deletedLine == 0) {
-            log.info("Не найдено данных по id {} и {}", userId, friendId);
-            throw new NotFoundException(String.format("Не найдено данных по id %d и %d",
-                    userId, friendId));
-        }
+       // if (deletedLine == 0) {
+      //      log.info("Не найдено данных по id {} и {}", userId, friendId);
+      //      throw new NotFoundException(String.format("Не найдено данных по id %d и %d",
+       //             userId, friendId));
+        //}
 
         log.info("Пользователь с id {} удалил из друзей пользователя с id {}", userId, friendId);
 
@@ -189,7 +189,8 @@ public class UserDbStorage implements UserStorage {
                 "JOIN friendships fs ON u.user_id = fs.friend_id " +
                 "WHERE fs.user_id = ?;";
 
-        return jdbcTemplate.query(query, new UserMapper(jdbcTemplate), userId);
+
+        return  jdbcTemplate.query(query, new UserMapper(jdbcTemplate), userId);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
-//import ru.yandex.practicum.filmorate.annotations.CorrectDate;
+import ru.yandex.practicum.filmorate.annotations.CorrectDate;
 
 
 import javax.validation.constraints.*;
@@ -12,13 +12,13 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 public class Film {
-    //@PositiveOrZero(message = "Id не может быть отрицательным")
+    @PositiveOrZero(message = "Id не может быть отрицательным")
     private Integer id;
     @NotBlank(message = "name - не должно быть пустым")
     private String name;
     @Size(min = 1, max = 200, message = "description - не должна привышать 200 символов")
     private String description;
-    @ru.yandex.practicum.filmorate.anotation.CorrectDate(message = "Дата релиза — не раньше 28 декабря 1895 года")
+    @CorrectDate(message = "Дата релиза — не раньше 28 декабря 1895 года")
     private LocalDate releaseDate;
     @Min(value = 1, message = "duration - должна быть не меньше 1 минуты")
     private long duration;
