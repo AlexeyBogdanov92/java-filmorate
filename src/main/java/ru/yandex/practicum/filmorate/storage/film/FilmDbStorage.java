@@ -51,7 +51,6 @@ public class FilmDbStorage implements FilmStorage {
                 "JOIN mpa m ON f.mpa_id = m.mpa_id " +
                 "WHERE f.film_id = ?";
         Film foundFilm;
-
         try {
             foundFilm = jdbcTemplate.queryForObject(query, new FilmMapper(jdbcTemplate), id);
             return foundFilm;
