@@ -19,6 +19,7 @@ public interface FilmStorage {
     public Map<String, String> deleteFilmById(Integer id);
 
     public Map<String, String> deleteAllFilms();
+
     public Film addLikeToFilm(Integer filmId, Integer userId);
 
     public Film deleteLikeFromFilm(Integer filmId, Integer userId);

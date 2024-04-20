@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest // указываем, о необходимости подготовить бины для работы с БД
 @RequiredArgsConstructor(onConstructor_ = @Autowired)

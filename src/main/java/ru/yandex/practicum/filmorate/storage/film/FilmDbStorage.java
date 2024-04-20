@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeptions.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exeptions.NotFoundException;
+import ru.yandex.practicum.filmorate.exeptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -18,7 +19,11 @@ import ru.yandex.practicum.filmorate.storage.film.mapper.GenreMapper;
 import ru.yandex.practicum.filmorate.storage.film.mapper.MPAMapper;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -62,18 +67,29 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film postFilm(Film film) {
+
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("films")
                 .usingGeneratedKeyColumns("film_id");
+        Map<String, Object> params = new HashMap<>();
 
-        int id = simpleJdbcInsert.executeAndReturnKey(
-                        Map.of(
-                                "film_name", film.getName(),
-                                "description", film.getDescription(),
-                                "release_date", film.getReleaseDate(),
-                                "duration", film.getDuration(),
-                                "mpa_id", film.getMpa().getId()))
-                .intValue();
+
+        params.put("film_name", film.getName());
+        params.put("description", film.getDescription());
+        params.put("release_date", film.getReleaseDate());
+        params.put("duration", film.getDuration());
+
+        if (film.getMpa() != null) {
+
+            try {
+                getMPAById(film.getMpa().getId());
+            } catch (NotFoundException e) {
+                throw new ValidationException(e.getMessage());
+            }
+            params.put("mpa_id", film.getMpa().getId());
+        }
+
+        int id = simpleJdbcInsert.executeAndReturnKey(params).intValue();
 
         log.info("Создан фильм с id {} в таблице films", id);
 
@@ -244,6 +260,17 @@ public class FilmDbStorage implements FilmStorage {
 
     private void checkFilmGenres(Film film) {
         if (film.getGenres() != null) {
+            List<Integer> genres = getAllGenres().stream()
+                    .map(Genre::getId)
+                    .collect(Collectors.toList());
+            Optional<Integer> missingId = film.getGenres().stream()
+                    .map(Genre::getId)
+                    .filter(id -> !genres.contains(id))
+                    .findFirst();
+            if (missingId.isPresent()) {
+                throw new ValidationException("Жанр с таким ид не найден " + missingId.get());
+            }
+
             for (Genre genre : film.getGenres()) {
                 jdbcTemplate.update(
                         "INSERT INTO films_genres (film_id, genre_id) VALUES (?, ?);",
@@ -251,6 +278,9 @@ public class FilmDbStorage implements FilmStorage {
                         genre.getId()
                 );
             }
+
         }
+
     }
+
 }
