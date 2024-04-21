@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
@@ -11,8 +12,9 @@ import java.util.Set;
 @Data
 @Builder
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
-
+    @EqualsAndHashCode.Include
     private Integer id;
     @NotBlank(message = "email - Не может быть пустым")
     @Email

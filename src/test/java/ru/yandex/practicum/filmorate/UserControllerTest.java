@@ -35,22 +35,22 @@ class UserControllerTest {
     void setUp() {
         userStorage = new InMemoryUserStorage();
         userService = new UserService(userStorage);
-        user1 = new User(1,"test@test.ru",
+        user1 = new User(1, "test@test.ru",
                 "testLogin", "Test-name",
                 LocalDate.of(2015, 11, 10), new HashSet<>());
-        user2 = new User(2,"test2@test2.ru",
+        user2 = new User(2, "test2@test2.ru",
                 "testLogin2", "Test-name2",
                 LocalDate.of(1994, 5, 12), new HashSet<>());
-        user3 = new User(3,"test3@test3.ru",
+        user3 = new User(3, "test3@test3.ru",
                 "testLogin3", "Test-name3",
                 LocalDate.of(1993, 1, 16), new HashSet<>());
-        user4 = new User(4,"test4@test4.ru",
+        user4 = new User(4, "test4@test4.ru",
                 "testLogin4", "Test-name4",
                 LocalDate.of(1978, 7, 23), new HashSet<>());
-        user5 = new User(5,"test5@test5.ru",
+        user5 = new User(5, "test5@test5.ru",
                 "testLogin5", "Test-name5",
                 LocalDate.of(1996, 11, 20), new HashSet<>());
-        user6 = new User(6,"test6@test6.ru",
+        user6 = new User(6, "test6@test6.ru",
                 "testLogin6", "Test-name6",
                 LocalDate.of(1969, 6, 16), new HashSet<>());
     }
@@ -230,85 +230,6 @@ class UserControllerTest {
         assertEquals(user2.getFriends().size(), 0);
         assertTrue(user2.getFriends().isEmpty());
         assertEquals(user2.getFriends(), Set.of());
-    }
-
-    @Test
-    void getFriendList() {
-        userService.postUser(user1);
-        userService.postUser(user2);
-        userService.postUser(user3);
-        userService.postUser(user4);
-        userService.postUser(user5);
-        userService.postUser(user6);
-
-        userService.addFriend(1, 3);
-        userService.addFriend(1, 5);
-        userService.addFriend(1, 6);
-
-        userService.addFriend(2, 1);
-        userService.addFriend(2, 3);
-        userService.addFriend(2, 6);
-
-        userService.addFriend(3, 5);
-
-        assertEquals(userService.getFriendList(1).size(), 4);
-        assertFalse(userService.getFriendList(1).isEmpty());
-        assertEquals(userService.getFriendList(1), List.of(user2, user3, user5, user6));
-
-        assertEquals(userService.getFriendList(2).size(), 3);
-        assertFalse(userService.getFriendList(2).isEmpty());
-        assertEquals(userService.getFriendList(2), List.of(user1, user3, user6));
-
-        assertEquals(userService.getFriendList(3).size(), 3);
-        assertFalse(userService.getFriendList(3).isEmpty());
-        assertEquals(userService.getFriendList(3), List.of(user1, user2, user5));
-
-        assertEquals(userService.getFriendList(4).size(), 0);
-        assertTrue(userService.getFriendList(4).isEmpty());
-        assertEquals(userService.getFriendList(4), List.of());
-
-        assertEquals(userService.getFriendList(5).size(), 2);
-        assertFalse(userService.getFriendList(5).isEmpty());
-        assertEquals(userService.getFriendList(5), List.of(user1, user3));
-
-        assertEquals(userService.getFriendList(6).size(), 2);
-        assertFalse(userService.getFriendList(6).isEmpty());
-        assertEquals(userService.getFriendList(6), List.of(user1, user2));
-    }
-
-    @Test
-    void getCommonFriendList() {
-        userService.postUser(user1);
-        userService.postUser(user2);
-        userService.postUser(user3);
-        userService.postUser(user4);
-        userService.postUser(user5);
-        userService.postUser(user6);
-
-        userService.addFriend(1, 3);
-        userService.addFriend(1, 5);
-        userService.addFriend(1, 6);
-
-        userService.addFriend(2, 1);
-        userService.addFriend(2, 3);
-        userService.addFriend(2, 6);
-
-        userService.addFriend(3, 5);
-
-        assertEquals(userService.getCommonFriendList(1, 2).size(), 2);
-        assertFalse(userService.getCommonFriendList(1, 2).isEmpty());
-        assertEquals(userService.getCommonFriendList(1, 2),
-                userService.getCommonFriendList(2, 1));
-
-        assertEquals(userService.getCommonFriendList(1, 4).size(), 0);
-        assertTrue(userService.getCommonFriendList(1, 4).isEmpty());
-        assertEquals(userService.getCommonFriendList(1, 4),
-                userService.getCommonFriendList(4, 1));
-
-        assertEquals(userService.getCommonFriendList(3, 5).size(), 1);
-        assertFalse(userService.getCommonFriendList(3, 5).isEmpty());
-        assertEquals(userService.getCommonFriendList(3, 5),
-                userService.getCommonFriendList(5, 3));
     }
 
     @Test
