@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exeptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -22,12 +23,10 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User getUserById(Integer id) {
         final User user = users.get(id);
-
         if (user == null) {
             log.error("Произошла ошибка при вызове метода getUserById");
             throw new NotFoundException(String.format("Пользователь с id: %s не найден", id));
         }
-
         log.info("Получен пользователь: {} \n по id: {}", user, id);
         return user;
     }
@@ -75,11 +74,9 @@ public class InMemoryUserStorage implements UserStorage {
     public User addFriend(Integer userId, Integer friendId) {
         final User user = getUserById(userId);
         final User friend = getUserById(friendId);
-
         user.getFriends().add(friendId);
         friend.getFriends().add(userId);
         log.info("Пользователи {} и {} стали друзьями", user.getName(), friend.getName());
-
         putUser(friend);
         return putUser(user);
     }
@@ -88,11 +85,9 @@ public class InMemoryUserStorage implements UserStorage {
     public User deleteFriend(Integer userId, Integer friendId) {
         final User user = getUserById(userId);
         final User friend = getUserById(friendId);
-
         user.getFriends().remove(friendId);
         friend.getFriends().remove(userId);
         log.info("Пользователи {} и {} больше не друзья", user.getName(), friend.getName());
-
         putUser(friend);
         return putUser(user);
     }
@@ -100,48 +95,21 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public List<User> getFriendList(Integer userId) {
         final User user = getUserById(userId);
-
         if (user.getFriends() == null || user.getFriends().isEmpty()) {
             log.info("Пользователь пока еще ни с кем не подружился");
             return List.of();
-        } else {
-            List<User> friendList = new ArrayList<>();
-
-            for (Integer id : user.getFriends()) {
-                friendList.add(getUserById(id));
-            }
-
-            log.info("Получен список друзей пользователя {} \n {}", user.getName(), friendList);
-            return friendList;
         }
+        return users.get(userId).getFriends().stream()
+                .map(id -> users.get(userId))
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<User> getCommonFriendList(Integer userId, Integer otherId) {
-        List<User> commonFriends = new ArrayList<>();
-
-        final User user = getUserById(userId);
-        final User otherUser = getUserById(otherId);
-
-        final Set<Integer> userFriends = user.getFriends();
-        final Set<Integer> otherUserFriends = otherUser.getFriends();
-
-        if ((userFriends == null || userFriends.isEmpty()) || (otherUserFriends == null || otherUserFriends.isEmpty())) {
-            log.info("У пользователей {} и {} нет общих друзей", user.getName(), otherUser.getName());
-            return commonFriends;
-        }
-
-        Set<Integer> otherUserFriendsSet = new HashSet<>(userFriends);
-        otherUserFriendsSet.retainAll(otherUserFriends);
-
-        Iterator<Integer> i = otherUserFriendsSet.iterator();
-        while (i.hasNext()) {
-            commonFriends.add(getUserById(i.next()));
-        }
-
-        log.info("Получен список общих друзей пользователей {} и {}", user.getName(), otherUser.getName());
-        return commonFriends;
+        List<User> userFriends = getFriendList(userId);
+        List<User> otherFriends = getFriendList(otherId);
+        userFriends.retainAll(otherFriends);
+        return userFriends;
     }
-
 
 }

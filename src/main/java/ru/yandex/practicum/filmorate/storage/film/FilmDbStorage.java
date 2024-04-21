@@ -271,13 +271,12 @@ public class FilmDbStorage implements FilmStorage {
                 throw new ValidationException("Жанр с таким ид не найден " + missingId.get());
             }
 
-            for (Genre genre : film.getGenres()) {
-                jdbcTemplate.update(
-                        "INSERT INTO films_genres (film_id, genre_id) VALUES (?, ?);",
-                        film.getId(),
-                        genre.getId()
-                );
-            }
+            jdbcTemplate.batchUpdate("INSERT INTO films_genres (film_id, genre_id) VALUES (?, ?);",
+                    film.getGenres(), film.getGenres().size(),
+                    (ps, genre) -> {
+                        ps.setInt(1, film.getId());
+                        ps.setInt(2, genre.getId());
+                    });
 
         }
 

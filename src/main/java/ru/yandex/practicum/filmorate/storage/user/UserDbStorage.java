@@ -28,7 +28,6 @@ public class UserDbStorage implements UserStorage {
     @Override
     public List<User> getAllUsers() {
         String query = "SELECT * FROM users";
-
         return jdbcTemplate.query(query, new UserMapper(jdbcTemplate));
     }
 
@@ -36,7 +35,6 @@ public class UserDbStorage implements UserStorage {
     public User getUserById(Integer id) {
         String query = "SELECT * FROM users WHERE user_id = ?";
         User foundUser;
-
         try {
             foundUser = jdbcTemplate.queryForObject(query, new UserMapper(jdbcTemplate), id);
             return foundUser;
@@ -51,7 +49,6 @@ public class UserDbStorage implements UserStorage {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("users")
                 .usingGeneratedKeyColumns("user_id");
-
         int id = simpleJdbcInsert.executeAndReturnKey(
                         Map.of(
                                 "email", user.getEmail(),
@@ -59,40 +56,29 @@ public class UserDbStorage implements UserStorage {
                                 "name", user.getName(),
                                 "birthday", user.getBirthday()))
                 .intValue();
-
         log.info("Создан пользователей с id {} в таблице users", id);
-
         user.setId(id);
-        checkUserFriend(user);
-
         return user;
     }
 
     @Override
     public User putUser(User user) {
-
         String query = "UPDATE users SET email = ?, " +
                 "login = ?, " +
                 "name = ?, " +
                 "birthday = ? " +
                 "WHERE user_id = ?;";
-
         int countUpdatedLines = jdbcTemplate.update(query,
                 user.getEmail(),
                 user.getLogin(),
                 user.getName(),
                 user.getBirthday(),
                 user.getId());
-
         if (countUpdatedLines == 0) {
             log.info("Пользователь с id {} не найден", user.getId());
             throw new NotFoundException(String.format("Пользователь с id %d не найден", user.getId()));
         }
-
         log.info("Пользователь с id {} обновлен", user.getId());
-
-        checkUserFriend(user);
-
         return user;
     }
 
@@ -102,12 +88,10 @@ public class UserDbStorage implements UserStorage {
                 "FROM users " +
                 "WHERE user_id = ?";
         int deleteLine = jdbcTemplate.update(query, id);
-
         if (deleteLine == 0) {
             log.info("Пользователь для удаления по id {} не найден", id);
             throw new NotFoundException(String.format("Пользователь для удаления по id %d не найден", id));
         }
-
         return Map.of("info", String.format("Пользователь по id: %d успешно удален", id));
     }
 
@@ -115,12 +99,10 @@ public class UserDbStorage implements UserStorage {
     public Map<String, String> deleteAllUsers() {
         String query = "DELETE FROM users";
         int deleteLines = jdbcTemplate.update(query);
-
         if (deleteLines == 0) {
             log.info("Не найдено ни одного пользователя для удаления не найдено");
             throw new NotFoundException(String.format("Не найдено ни одного пользователя для удаления не найдено"));
         }
-
         return Map.of("info", String.format("Все пользователи удалены"));
     }
 
@@ -128,8 +110,6 @@ public class UserDbStorage implements UserStorage {
     public User addFriend(Integer userId, Integer friendId) {
         final User foundUser = getUserById(userId);
         final User foundFriend = getUserById(friendId);
-
-        // проверим, есть ли лайк фильму от пользователя
         String query = "SELECT " +
                 "COUNT(friendship_id) " +
                 "FROM friendships " +
@@ -142,7 +122,6 @@ public class UserDbStorage implements UserStorage {
                     "Пользователь с id %d уже находится в друзьях у пользователя с id %d",
                     friendId, userId));
         }
-
         jdbcTemplate.update("INSERT INTO friendships (user_id, friend_id, status) VALUES (?, ?, ?);",
                 userId, friendId, false);
         log.info("Пользователь с id {} добавил в друзья пользователя с id {}", userId, friendId);
@@ -151,7 +130,6 @@ public class UserDbStorage implements UserStorage {
                 "SELECT friend_id FROM friendships WHERE user_id = ? AND friend_id = ?;",
                 Integer.class, userId, friendId);
         foundUser.setFriends(new HashSet<>(userFriends));
-
         return foundUser;
     }
 
@@ -159,19 +137,15 @@ public class UserDbStorage implements UserStorage {
     public User deleteFriend(Integer userId, Integer friendId) {
         final User foundUser = getUserById(userId);
         final User foundFriend = getUserById(friendId);
-
         String query = "DELETE " +
                 "FROM friendships " +
                 "WHERE user_id = ? AND friend_id = ?;";
         int deletedLine = jdbcTemplate.update(query, userId, friendId);
-
         log.info("Пользователь с id {} удалил из друзей пользователя с id {}", userId, friendId);
-
         List<Integer> userFriends = jdbcTemplate.queryForList(
                 "SELECT friend_id FROM friendships WHERE user_id = ? AND friend_id = ?;",
                 Integer.class, userId, friendId);
         foundUser.setFriends(new HashSet<>(userFriends));
-
         return foundUser;
     }
 
@@ -181,15 +155,12 @@ public class UserDbStorage implements UserStorage {
         try {
             getUserById(userId);
         } catch (NotFoundException e) {
-
             throw new ValidationException(e.getMessage());
         }
-
         String query = "SELECT u.* " +
                 "FROM users u " +
                 "JOIN friendships fs ON u.user_id = fs.friend_id " +
                 "WHERE fs.user_id = ?;";
-
 
         return jdbcTemplate.query(query, new UserMapper(jdbcTemplate), userId);
     }
@@ -206,21 +177,6 @@ public class UserDbStorage implements UserStorage {
                 "WHERE user_id = ?" +
                 ");";
         List<User> commonFriends = jdbcTemplate.query(query, new UserMapper(jdbcTemplate), userId, otherId);
-
         return commonFriends;
     }
-
-    private void checkUserFriend(User user) {
-        if (user.getFriends() != null) {
-            for (int friend : user.getFriends()) {
-                jdbcTemplate.update(
-                        "INSERT INTO friendships (user_id, friend_id) VALUES (?, ?);",
-                        user.getId(),
-                        friend
-                );
-            }
-        }
-    }
-
-
 }

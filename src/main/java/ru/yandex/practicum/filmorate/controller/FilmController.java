@@ -71,10 +71,10 @@ public class FilmController {
     }
 
     @GetMapping("/films/popular")
-    public List<Film> getPopularFilm(@RequestParam(name = "count", defaultValue = "10") String count) {
+    public List<Film> getPopularFilm(@RequestParam(name = "count", defaultValue = "10") int count) {
         log.info("Получение топ-{} фильмов", count);
-        Integer intCount = Integer.parseInt(count);
-        return filmService.getPopularFilms(intCount);
+        //Integer intCount = Integer.parseInt(count);
+         return filmService.getPopularFilms(count);
     }
 
     @GetMapping("/genres")

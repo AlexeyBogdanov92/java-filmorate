@@ -12,7 +12,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 public class User {
-    //@Positive(message = "Id не может быть отрицательным")
+
     private Integer id;
     @NotBlank(message = "email - Не может быть пустым")
     @Email
