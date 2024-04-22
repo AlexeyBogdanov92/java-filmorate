@@ -1,22 +1,48 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exeptions.NotFoundException;
-import ru.yandex.practicum.filmorate.exeptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
+@Qualifier("inMemoryFilmStorage")
 public class InMemoryFilmStorage implements FilmStorage {
+    @Qualifier("inMemoryUserStorage")
+    private final UserStorage userStorage;
     private final LocalDate creationDate = LocalDate.of(1895, 12, 28);
-    private final HashMap<Integer, Film> films = new HashMap<>();
+    private HashMap<Integer, Film> films = new HashMap<>();
+    private final List<Genre> genres = List.of(
+            new Genre(1, "Комедия"),
+            new Genre(2, "Триллер"),
+            new Genre(3, "Боевик"),
+            new Genre(4, "Драма"),
+            new Genre(5, "Мелодрама"),
+            new Genre(6, "Ужасы")
+    );
+    private final List<MPA> mpaList = List.of(
+            new MPA(1, "G", 0),
+            new MPA(2, "PG", 0),
+            new MPA(3, "PG-13", 13),
+            new MPA(4, "R", 17),
+            new MPA(5, "NC-17", 18)
+    );
+
 
     @Override
     public List<Film> getAllFilms() {
@@ -38,12 +64,6 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film postFilm(Film film) {
-        if (film.getReleaseDate().isBefore(creationDate)) {
-            log.error("Произошла ошибка при вызове метода postFilm");
-            throw new ValidationException("Не удалось добавить фильм, " +
-                    "т.к. дата релиза не может быть раньше даты создания кино.");
-        }
-
         film.generateId();
         films.put(film.getId(), film);
         log.info("Фильм успешно создан: {}", film);
@@ -52,11 +72,11 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film putFilm(Film film) {
+
         if (!films.containsKey(film.getId())) {
-            log.error("Произошла ошибка при вызове метода putFilm");
+            log.error("Произошла ошибка при вызове метода updateFilm");
             throw new NotFoundException(String.format("Фильм с id: %s не найден", film.getId()));
         }
-
         films.put(film.getId(), film);
         log.info("Данные фильма успешно обновлены: {}", film);
         return film;
@@ -76,4 +96,54 @@ public class InMemoryFilmStorage implements FilmStorage {
         log.info("Все фильмы успешно удалены");
         return Map.of("info", String.format("Все фильмы успешно удалены"));
     }
+
+    @Override
+    public Film addLikeToFilm(Integer filmId, Integer userId) {
+        final Film film = getFilmById(filmId);
+        final User user = userStorage.getUserById(userId);
+        film.getLikes().add(userId);
+        log.info("Пользователь {} поставил лайка фильму {}", user.getName(), film.getName());
+        return film;
+    }
+
+    @Override
+    public Film deleteLikeFromFilm(Integer filmId, Integer userId) {
+        final Film film = getFilmById(filmId);
+        final User user = userStorage.getUserById(userId);
+        log.info("Пользователь {} удаляет лайк у фильма {}", user.getName(), film.getName());
+
+        film.getLikes().remove(userId);
+        log.info("Пользователь {} удалил лайк у фильма {}", user.getName(), film.getName());
+        return film;
+    }
+
+    @Override
+    public List<Film> getPopularFilms(Integer count) {
+        return getAllFilms().stream()
+                .sorted((film1, film2) -> film2.getLikes().size() - film1.getLikes().size())
+                .limit(count)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Genre> getAllGenres() {
+        return genres;
+    }
+
+    @Override
+    public Genre getGenreById(Integer genreId) {
+        return genres.get(genreId);
+    }
+
+    @Override
+    public List<MPA> getAllMPA() {
+        return mpaList;
+    }
+
+    @Override
+    public MPA getMPAById(Integer mpaId) {
+        return mpaList.get(mpaId);
+    }
+
+
 }

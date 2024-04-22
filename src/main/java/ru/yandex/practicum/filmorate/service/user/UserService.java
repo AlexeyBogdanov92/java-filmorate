@@ -8,7 +8,8 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +28,13 @@ public class UserService {
     }
 
     public User postUser(User user) {
+        //validate(user, "создание");
         log.info("Создание пользователя: {}", user);
         return userStorage.postUser(user);
     }
 
     public User putUser(User user) {
+        //validate(user, "обновление");
         log.info("Обновление данных пользователя: {}", user);
         return userStorage.putUser(user);
     }
@@ -47,75 +50,20 @@ public class UserService {
     }
 
     public User addFriend(Integer userId, Integer friendId) {
-        final User user = userStorage.getUserById(userId);
-        final User friend = userStorage.getUserById(friendId);
-        log.info("Пользователь {} добавляет в друзья пользователя {}", user.getName(), friend.getName());
-
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
-        log.info("Пользователи {} и {} стали друзьями", user.getName(), friend.getName());
-
-        userStorage.putUser(friend);
-        return userStorage.putUser(user);
+        return userStorage.addFriend(userId, friendId);
     }
 
     public User deleteFriend(Integer userId, Integer friendId) {
-        final User user = userStorage.getUserById(userId);
-        final User friend = userStorage.getUserById(friendId);
-        log.info("Пользователь {} удаляет из друзей пользователя {}", user.getName(), friend.getName());
-
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
-        log.info("Пользователи {} и {} больше не друзья", user.getName(), friend.getName());
-
-        userStorage.putUser(friend);
-        return userStorage.putUser(user);
+        return userStorage.deleteFriend(userId, friendId);
     }
 
     public List<User> getFriendList(Integer userId) {
-        final User user = userStorage.getUserById(userId);
-        log.info("Получение списка друзей пользователя {}", user.getName());
-
-        if (user.getFriends() == null || user.getFriends().isEmpty()) {
-            log.info("Пользователь пока еще ни с кем не подружился");
-            return List.of();
-        } else {
-            List<User> friendList = new ArrayList<>();
-
-            for (Integer id : user.getFriends()) {
-                friendList.add(userStorage.getUserById(id));
-            }
-
-            log.info("Получен список друзей пользователя {} \n {}", user.getName(), friendList);
-            return friendList;
-        }
+        List<User> users = userStorage.getFriendList(userId);
+        return users;
     }
 
     public List<User> getCommonFriendList(Integer userId, Integer otherId) {
-        List<User> commonFriends = new ArrayList<>();
-
-        final User user = userStorage.getUserById(userId);
-        final User otherUser = userStorage.getUserById(otherId);
-
-        log.info("Получение списка общих друзей пользователей {} и {}", user.getName(), otherUser.getName());
-        final Set<Integer> userFriends = user.getFriends();
-        final Set<Integer> otherUserFriends = otherUser.getFriends();
-
-        if ((userFriends == null || userFriends.isEmpty()) || (otherUserFriends == null || otherUserFriends.isEmpty())) {
-            log.info("У пользователей {} и {} нет общих друзей", user.getName(), otherUser.getName());
-            return commonFriends;
-        }
-
-        Set<Integer> otherUserFriendsSet = new HashSet<>(userFriends);
-        otherUserFriendsSet.retainAll(otherUserFriends);
-
-        Iterator<Integer> i = otherUserFriendsSet.iterator();
-        while (i.hasNext()) {
-            commonFriends.add(userStorage.getUserById(i.next()));
-        }
-
-        log.info("Получен список общих друзей пользователей {} и {}", user.getName(), otherUser.getName());
-        return commonFriends;
+        return userStorage.getCommonFriendList(userId, otherId);
     }
 
     public void validate(User user, String messagePath) throws ValidationException {

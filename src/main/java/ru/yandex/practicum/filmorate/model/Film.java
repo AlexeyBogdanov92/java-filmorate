@@ -1,27 +1,35 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import ru.yandex.practicum.filmorate.annotations.CorrectDate;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.PositiveOrZero;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 
 @Data
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
 public class Film {
+    @PositiveOrZero(message = "Id не может быть отрицательным")
     private Integer id;
-    @NotBlank
+    @NotBlank(message = "name - не должно быть пустым")
     private String name;
-    @Size(max = 200)
+    @Size(min = 1, max = 200, message = "description - не должна привышать 200 символов")
     private String description;
-    @NotNull
+    @CorrectDate(message = "Дата релиза — не раньше 28 декабря 1895 года")
     private LocalDate releaseDate;
-    @Min(1)
+    @Min(value = 1, message = "duration - должна быть не меньше 1 минуты")
     private long duration;
+    private Set<Genre> genres;
+    private MPA mpa;
+    private Set<Integer> likes;
     private static int countID = 0;
-    private final Set<Integer> likes = new HashSet<>();
 
     public void generateId() {
         countID++;
@@ -31,5 +39,6 @@ public class Film {
     public static void resetCountID() {
         countID = 0;
     }
+
 
 }
